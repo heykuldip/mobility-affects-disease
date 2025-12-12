@@ -1,0 +1,20 @@
+stop.at: 1200
+pop_size: 1000000
+
+agent_log_file: 'output/nhts_distance'
+
+input_agents: 'input/ffx_agents_trips_distance.csv'
+input_buildings: 'input/input_buildings_ffx.csv'
+input_dwell_time: 'input/dwell_time_distance.json'
+input_restaurants: 'input/restaurants_dict_distance.json'
+input_recreations: 'input/recreation_dict_distance.json'
+input_errands: 'input/errands_dict_distance.json'
+input_hospitals: 'input/hospitals_dict_distance.json'
+
+start_time: '2024-01-01T00:00:00'
+infectious_start_rate: 0.0169
+infection_chance: 0.10
+exposed_duration: (1,2) # uniform(LB, UB)
+infection_duration: (1,5)
+immunity_duration: (10,20)
+dwell_time: (1,5)

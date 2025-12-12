@@ -1,0 +1,20 @@
+stop.at: 1200
+pop_size: 1000000
+
+agent_log_file: 'output/random_advan'
+
+input_agents: 'input/ffx_agents_trips_advan.csv'
+input_buildings: 'input/input_buildings_ffx.csv'
+input_restaurants: 'input/restaurants_dict.json'
+input_recreations: 'input/recreation_dict.json'
+input_errands: 'input/errands_dict.json'
+input_hospitals: 'input/hospitals_dict.json'
+input_schools: 'input/schools_dict.json'
+
+start_time: '2024-01-01T00:00:00'
+infectious_start_rate: 0.0169
+infection_chance: 0.10
+exposed_duration: (1,2) # uniform(LB, UB)
+infection_duration: (1,5)
+immunity_duration: (10,20)
+dwell_time: (4,10)
