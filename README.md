@@ -39,13 +39,18 @@ output/           (created after runs)
 
 ## 1. Prerequisites
 
-Tested versions: - Python 3.11.4 - Repast4Py 1.1.6 - MPICH 3.3.2
+Tested versions: 
+- Python 3.11.4
+- - Repast4Py 1.1.6
+  - - MPICH 3.3.2
 
 You must ensure compatible versions on your machine or cluster. Use an
 isolated environment. We use **pipenv** in this guide.
 
-You need: - Python 3.11.x - An MPI implementation (MPICH or OpenMPI) -
-Compiler toolchain (GCC/Clang with MPI wrappers)
+You need: 
+- Python 3.11.x
+- An MPI implementation (MPICH or OpenMPI)
+- Compiler toolchain (GCC/Clang with MPI wrappers)
 
 ------------------------------------------------------------------------
 
@@ -209,8 +214,9 @@ pipenv run python -c "import mpi4py, repast4py; print('imports ok')"
 
 ## 9. Reproducibility via Containers
 
-Recommendation: - Use Singularity or Apptainer for HPC. - Optionally
-provide Docker for local use.
+Recommendation: 
+- Use Singularity or Apptainer for HPC.
+- We provided a Docker image.
 
 ``` bash
 mpirun -n <N> python nhts_advan.py config/nhts_advan.yaml
