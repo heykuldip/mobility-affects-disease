@@ -1,7 +1,7 @@
 # mobility-affects-disease
 
 An MPI-parallel agent-based simulation, built on [Repast4Py](https://github.com/Repast/repast4py), of how
-mobility assumptions shape contact networks and epidemic outcomes. Five mobility scenarios move a synthetic
+mobility assumptions shape contact networks and epidemic outcomes. Five mobility models move a synthetic
 population of 1,000,000 agents through 347,120 places in Fairfax County, Virginia, in hourly steps over
 50 simulated days, with identical disease parameters.
 
@@ -10,21 +10,22 @@ This is the code for:
 > Atwal KS, Von Hoene E, Amiri H, Pfoser D, Züfle A, Anderson T. *Mobility and Contact Networks Shape
 > Epidemic Outcomes: A Large-Scale Agent-Based Modeling Study.* arXiv:2607.26217 (2026).
 
-The version used for the paper is tagged `v1.0-paper`.
+The code for the revised paper (arXiv v2) is tagged `v2.0-paper`. It corrects three issues in the original
+version, tagged `v1.0-paper`, whose results it supersedes: the random-number generators are now seeded independently on each process, so runs are reproducible; contacts are chosen from a random ordering of the agents present, fixed for the run; and the R0 counter now counts only new infections.
 
 ------------------------------------------------------------------------
 
-## Scenarios
+## Mobility models
 
-| Scenario (paper) | Script | Daily activities | Destination choice |
+| Mobility model (paper) | Script | Daily activities | Destination choice |
 |---|---|---|---|
-| NHTS Advan | `nhts_advan.py` | NHTS trip chains | Advan foot-traffic weights |
+| NHTS Advan | `nhts_advan.py` | NHTS trip chains | Advan foot-traffic weights; workplaces from LODES commuting flows |
 | NHTS Distance | `nhts_distance.py` | NHTS trip chains | Distance decay from home |
 | NHTS Random | `nhts_random.py` | NHTS trip chains | Uniform within the activity's place type |
-| Random Advan | `random_advan.py` | Random activities, uniform dwell times | Advan foot-traffic weights |
+| Random Advan | `random_advan.py` | Random activities, uniform dwell times | Advan foot-traffic weights for public places and schools; homes and workplaces uniform |
 | Random Places | `random_places.py` | No activity structure, uniform dwell times | Uniform over all places |
 
-Each script has a matching `config/*.yaml` and `*.slurm` file.
+Each script has a matching `config/*.yaml`.
 
 ## Project structure
 
@@ -32,25 +33,28 @@ Each script has a matching `config/*.yaml` and `*.slurm` file.
 README.md
 LICENSE
 nhts_advan.py
-nhts_advan.slurm
-nhts_random.py
-nhts_random.slurm
 nhts_distance.py
-nhts_distance.slurm
+nhts_random.py
 random_advan.py
-random_advan.slurm
 random_places.py
-random_places.slurm
-process_output.ipynb
+places.py
 human_agent/
   ├─ human_agent.py
   └─ disease.py
 config/
   ├─ nhts_advan.yaml
-  ├─ nhts_random.yaml
   ├─ nhts_distance.yaml
+  ├─ nhts_random.yaml
   ├─ random_advan.yaml
   └─ random_places.yaml
+scripts/
+  └─ run_sweep.sh             the paper's runs on Slurm
+analysis/
+  ├─ submit_networks.sh       contact networks and mobility measures, one Slurm job per run
+  ├─ networks.py
+  ├─ second_waves.py          whether each run's epidemic recurs after its first wave
+  ├─ postprocessing.ipynb     Tables 1-4 and Figs. 1 and 3
+  └─ destination_weights.py   Fig. 2 (needs the licensed Advan inputs)
 input/            (created by you)
 output/           (created after runs)
 ```
@@ -59,19 +63,22 @@ output/           (created after runs)
 
 ## 1. Requirements
 
-- **Container (used for the paper):** Singularity or Apptainer, plus a host MPI that is ABI-compatible
-  with the MPICH inside the image. The paper's runs used `mpich/3.3.2-ofi` on the host.
+- **Container (used for the paper):** Singularity or Apptainer. The MPICH inside the image starts the
+  processes, so no host MPI is needed.
 - **Native install (alternative):** Python 3.11, an MPI implementation (MPICH or Open MPI) with its
   compiler wrappers (`mpicc`, `mpicxx`), and pipenv.
+- **Analysis:** Python 3 with numpy, pandas, matplotlib, pyyaml and python-igraph (the paper's analysis
+  used Python 3.12.8).
 
-Tested versions:
+Tested versions (inside the container):
 
 - Python 3.11.4
+- mpi4py 4.0.0
 - Repast4Py 1.1.6
-- MPICH 3.3.2
+- MPICH 3.4.3
 
-A full-scale run needs one node with about 200 GB of memory and 66–104 GB of disk for its log. See
-[Resource requirements](#8-resource-requirements).
+A full-scale run needs one node with about 200 GB of memory (the paper’s runs requested 488 GB for Random Advan)
+and 66–104 GB of disk for its log. See [Resource requirements](#8-resource-requirements).
 
 ------------------------------------------------------------------------
 
@@ -80,7 +87,7 @@ A full-scale run needs one node with about 200 GB of memory and 66–104 GB of d
 ``` bash
 git clone https://github.com/heykuldip/mobility-affects-disease.git
 cd mobility-affects-disease
-git checkout v1.0-paper     # the version used for the paper
+git checkout v2.0-paper     # the version used for the revised paper
 mkdir -p input output
 ```
 
@@ -95,8 +102,12 @@ from `input/`:
 |---|---|
 | `ffx_agents_trips_*.csv` | Agents with census tract, type (worker, student or homemaker) and daily trip chain, including home, work and school locations |
 | `input_buildings_ffx.csv` | The 347,120 places (building footprints and points of interest), with type and coordinates |
-| `dwell_time_*.json` | Activity start times and durations for the NHTS-based scenarios |
+| `dwell_time_*.json` | Activity start times and durations for the NHTS-based models |
 | `restaurants_dict*.json`, `recreation_dict*.json`, `errands_dict*.json`, `hospitals_dict*.json`, `schools_dict.json` | Candidate destinations and selection probabilities by census tract |
+
+For `scripts/run_sweep.sh`, put each model's files in its own folder, `<INPUTS>/<folder>/input/`, where
+the folders are `nhts_advan`, `nhts_distance`, `nhts_random`, `random_advan` and `random_all` (Random
+Places). The distance-decay variants' files (Fig. 3) go in `<INPUTS>/nhts_distance/distance_decay_input/`.
 
 The inputs are built from:
 
@@ -114,67 +125,53 @@ subject to the data license.
 
 ## 4. Run with the container (used for the paper)
 
-The software environment is a public image built from
-[GMU-GeoSciences/repast4py-container](https://github.com/GMU-GeoSciences/repast4py-container):
+The software environment is a public image:
 
-- Image: `ghcr.io/gmu-geosciences/repast4py-container:v1.0.4`
-- Digest: `sha256:cdc412e4b0969108414055b15cb94cf040c566903184b882d207c8a3d5cbed44`
-
-The paper's runs used an image built from the `latest` tag, which points to this same image.
+- Image: `ghcr.io/heykuldip/mobility-affects-disease:1.1.0`
+- Digest: `sha256:6b2c7a00372cd8800b7c435b7d736150c95886e1ce3bca9165c739a8be8b079d`
 
 Build a Singularity image once (Apptainer accepts the same command):
 
 ``` bash
-singularity build repast4py_v1.0.4.sif docker://ghcr.io/gmu-geosciences/repast4py-container:v1.0.4
+singularity build abm-1.1.0.sif docker://ghcr.io/heykuldip/mobility-affects-disease@sha256:6b2c7a00372cd8800b7c435b7d736150c95886e1ce3bca9165c739a8be8b079d
 ```
 
-The host's MPI then starts the processes inside the container:
+The MPICH inside the image starts the processes. Set `random.seed` in the config first: the model stops
+without it.
 
 ``` bash
-mpirun -n 64 singularity run repast4py_v1.0.4.sif python nhts_advan.py config/nhts_advan.yaml
+singularity exec --cleanenv abm-1.1.0.sif mpiexec -n 64 python nhts_advan.py config/nhts_advan.yaml
 ```
 
-This works because the host MPI and the MPICH in the image share an ABI. Check it before a long run;
-each process should print a different rank and the same size:
+`--cleanenv` keeps your shell's environment, such as a `PYTHONPATH`, out of the container. Check MPI
+before a long run; each process should print a different rank and the same size:
 
 ``` bash
-mpirun -n 2 singularity run repast4py_v1.0.4.sif \
+singularity exec --cleanenv abm-1.1.0.sif mpiexec -n 2 \
     python -c "from mpi4py import MPI; c = MPI.COMM_WORLD; print(c.Get_rank(), c.Get_size())"
 ```
 
-If every process prints `0 1`, the host MPI and the image's MPI don't match.
+If every process prints `0 1`, the processes didn't form one MPI job.
 
 ------------------------------------------------------------------------
 
 ## 5. Run with Slurm (as for the paper)
 
-The paper's 30 runs per scenario were submitted as a Slurm job array. Each task was one independent
-50-day simulation using 64 MPI ranks on one node, and passed Repast4Py a JSON parameter override so
-that it wrote its own log. The provided `*.slurm` scripts launch a single run; to run the full set,
-add the array and override lines:
+The paper's runs, 30 per mobility model with base seeds 1–30, and the four distance-decay variants of
+Fig. 3, were made with `scripts/run_sweep.sh`. Each run uses 64 MPI processes on one node. Run it from the
+repository root with the model files committed, so each run records the commit it ran:
 
 ``` bash
-#SBATCH --nodes=1
-#SBATCH --ntasks=64
-#SBATCH --mem=200GB
-#SBATCH --time=2-12:00:00
-#SBATCH --array=0-29
-
-# load your cluster's MPI and Singularity modules here
-SIF=/path/to/repast4py_v1.0.4.sif
-OVERRIDE=$(printf '{"agent_log_file": "output/agent_log0_%s"}' "$SLURM_ARRAY_TASK_ID")
-mpirun -n 64 singularity run "$SIF" python ./nhts_advan.py ./config/nhts_advan.yaml "$OVERRIDE"
+export INPUTS=/path/to/inputs          # the folders described in section 3
+export IMG=/path/to/abm-1.1.0.sif
+bash scripts/run_sweep.sh sweep         # builds the run folders and shows the sbatch commands
+bash scripts/run_sweep.sh sweep --submit
+bash scripts/run_sweep.sh decay --submit
 ```
 
-Edit the partition, account, memory, time limit and image path for your cluster, then submit:
-
-``` bash
-sbatch nhts_advan.slurm
-sbatch nhts_distance.slurm
-sbatch nhts_random.slurm
-sbatch random_advan.slurm
-sbatch random_places.slurm
-```
+Results go to `$OUT/<sweep|decay>/<model>/runs/run_NN/` (by default `OUT=/scratch/$USER/abm`). The script
+sets each model's partition and memory; override them with `PARTITION` and `MEMORY`, and see its header
+for the other settings.
 
 ------------------------------------------------------------------------
 
@@ -201,7 +198,8 @@ pipenv run python -c "import mpi4py, repast4py; print('ok')"
 pipenv run mpirun -n 2 python -c "from mpi4py import MPI; c = MPI.COMM_WORLD; print(c.Get_rank(), c.Get_size())"
 ```
 
-Run interactively, replacing `64` with the number of cores you can use (`mpiexec` works too):
+Run interactively, replacing `64` with the number of cores you can use (`mpiexec` works too). As in
+section 4, set `random.seed` in the config first.
 
 ``` bash
 pipenv run mpirun -n 64 python nhts_advan.py config/nhts_advan.yaml
@@ -211,26 +209,39 @@ pipenv run mpirun -n 64 python random_advan.py config/random_advan.yaml
 pipenv run mpirun -n 64 python random_places.py config/random_places.yaml
 ```
 
-To use this environment in the Slurm scripts, activate it (`source "$(pipenv --venv)/bin/activate"`) and
-replace `singularity run <image> python` with `python`.
-
 ------------------------------------------------------------------------
 
 ## 7. Outputs and post-processing
 
-Each run writes one CSV to `output/`, with a row per agent per simulated hour: `tick`, `agent_id`,
-`disease_state`, `x`, `y`, `n_infected` and `agents_contacted` (that hour's contacts).
+Each run writes, next to its log file:
 
-To regenerate the disease curves, install Jupyter and the packages the notebook imports (for example
-`pipenv install jupyter pandas`), then open `process_output.ipynb` and run all cells. The notebook is
-saved with reference results for comparison.
+- `agent_log0.csv`: a row per agent per simulated hour, with `tick`, `agent_id`, `disease_state`, `x`,
+  `y`, `n_infected` and `agents_contacted` (that hour's contacts). Set `write_agent_log: false` in the
+  config to skip it.
+- `summary_ticks.csv`: the agents in each disease state, and the new infections, per hour.
+- `initial_cases.csv`: the infections caused by each initial case, from which R0 is computed.
+- `run_info.json`: the run's seeds, R0 and resource use.
+
+Then:
+
+``` bash
+bash analysis/submit_networks.sh $OUT/sweep --submit    # network.json and mobility.json in each run folder
+bash analysis/submit_networks.sh $OUT/decay --submit
+python analysis/second_waves.py $OUT/sweep
+SWEEP_DIR=$OUT/sweep DECAY_DIR=$OUT/decay jupyter nbconvert --to notebook --execute analysis/postprocessing.ipynb
+```
+
+The notebook produces Tables 1–4 and Figs. 1 and 3, and is saved with the paper's results.
+`analysis/destination_weights.py` produces Fig. 2 from the licensed Advan inputs.
 
 ------------------------------------------------------------------------
 
 ## 8. Resource requirements
 
-A run takes 2.3–3.3 hours on one node with 64 MPI ranks and writes 66–104 GB of output. All 150 runs
-(30 per scenario) produce about 12 TB, so point `output/` at scratch storage.
+A run takes a few hours on one node with 64 MPI ranks and writes a 66–104 GB log. All 150 runs (30 per
+mobility model) produce about 12 TB, so point `OUT` at scratch storage. Building a run's network reads its
+whole log, taking about 1.5 hours and up to about 100 GB of memory; Random Advan's much denser networks
+need several times more, which is why the paper's network measures for it come from five runs.
 
 ------------------------------------------------------------------------
 
@@ -261,10 +272,11 @@ pipenv run python -c "import mpi4py, repast4py; print('imports ok')"
 
 ## 10. Reproducibility notes
 
-- The paper reports results from 30 runs per scenario.
-- Runs are stochastic, so results vary between runs; compare averages across runs rather than individual
-  outputs.
-- All scenarios were re-tested after the code was cleaned for release.
+- The paper reports results from 30 runs per mobility model (base seeds 1–30), each with 64 MPI processes.
+- A run is reproducible from its base seed (`random.seed`): every process seeds its generators from it, so
+  rerunning with the same seed and number of processes gives the same results.
+- The released code reproduces the paper's runs: the first two simulated days of each model's first run
+  match the original runs exactly.
 
 ------------------------------------------------------------------------
 
