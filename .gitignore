@@ -1,0 +1,5 @@
+container/settings.local.sh
+container/v1.0.4.def
+__pycache__/
+analysis/tables/
+analysis/*.pdf

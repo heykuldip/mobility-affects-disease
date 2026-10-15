@@ -1,7 +1,12 @@
+#random.seed: 42
+#stop.at: 4325
+#stop.at: 2400
 stop.at: 1200
+#pop_size: 10000
+#pop_size: 818000
 pop_size: 1000000
 
-agent_log_file: 'output/nhts_advan'
+agent_log_file: 'batch_output/agent_log'
 
 input_agents: 'input/ffx_agents_trips_advan.csv'
 input_buildings: 'input/input_buildings_ffx.csv'
@@ -11,10 +16,25 @@ input_recreations: 'input/recreation_dict.json'
 input_errands: 'input/errands_dict.json'
 input_hospitals: 'input/hospitals_dict.json'
 
+# disease parameters
 start_time: '2024-01-01T00:00:00'
+#infectious_start_rate: 0.0001
+#infectious_start_rate: 0.0141      # 1000 agents
+#infectious_start_rate: 0.00141
 infectious_start_rate: 0.0169
+#infection_chance: 0.04
+#infection_chance: 0.10
+#infection_chance: 0.05
 infection_chance: 0.10
 exposed_duration: (1,2) # uniform(LB, UB)
 infection_duration: (1,5)
+#immunity_duration: (5,10)  # uniform(LB, UB)
 immunity_duration: (10,20)
 dwell_time: (1,5)
+
+#infectious_start_rate: 0.01 # portion of starting population that is infectious
+#infectious_start_rate: 0.001  
+#infection_chance: 0.08 # Chance that agent will be infected upon single contact with infected agent
+#infection_chance: 0.02
+#infection_duration: (1,4) # uniform(LB, UB)
+#immunity_duration: (1,4)  # uniform(LB, UB)

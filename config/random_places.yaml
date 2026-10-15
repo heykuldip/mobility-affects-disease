@@ -1,15 +1,28 @@
+#random.seed: 42
+#stop.at: 4325
+#stop.at: 2400
 stop.at: 1200
+#pop_size: 10000
+#pop_size: 818000
 pop_size: 1000000
+#pop_size: 100
 
-agent_log_file: 'output/random_places'
+#agent_log_file: 'output/agent_log'
+agent_log_file: 'batch_output/agent_log'
 
 input_agents: 'input/ffx_agents_trips_advan.csv'
 input_buildings: 'input/input_buildings_ffx.csv'
+#input_buildings_weighed: 'input/bldgs_weighted.csv'
 
+# disease parameters
 start_time: '2024-01-01T00:00:00'
+#infectious_start_rate: 0.0001
+#infectious_start_rate: 0.00141
 infectious_start_rate: 0.0169
+#infection_chance: 0.04
 infection_chance: 0.10
 exposed_duration: (1,2) # uniform(LB, UB)
 infection_duration: (1,5)
 immunity_duration: (10,20)  # uniform(LB, UB)
 dwell_time: (4,10)
+#dwell_time: (1,5)
