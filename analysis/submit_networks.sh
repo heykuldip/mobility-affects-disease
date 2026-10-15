@@ -18,8 +18,8 @@ TREE=${1:-}; [[ -d "$TREE" ]] || { sed -n '2,15p' "$0"; exit 1; }
 SUBMIT=${2:-}
 python3 -c "import numpy, pandas, yaml, igraph" 2>/dev/null || { echo "This Python lacks numpy, pandas, pyyaml or python-igraph: activate the environment first." >&2; exit 1; }
 REPO=$(pwd); [[ -f "$REPO/analysis/networks.py" ]] || { echo "Run this from the repository root." >&2; exit 1; }
-# Every submission gets its own list file, never rewritten: an array task reads its line from the list when it
-# starts, so rewriting a list while some of its tasks still wait would hand them the wrong runs. Lists live in
+# Every submission gets its own list file: an array task reads its line from the list when it
+# starts, so rewriting a list while some of its tasks still wait would hand them the wrong runs. Lists in
 # network_lists/<time>.txt, with the job's ID beside them in <time>.jobid.
 reg="$TREE/network_lists"; mkdir -p "$reg"
 active_job() { command -v squeue >/dev/null 2>&1 || return 0; squeue -h -j "$1" 2>/dev/null | grep -q .; }
