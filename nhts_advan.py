@@ -31,9 +31,6 @@ log = pylog.getLogger(__name__)
 
 def restore_agent(agent_tuple: Tuple):
     """
-    Deer tuple example: ((5, 0, 1), CFG_Dict_Object)
-    (5, 0 ,1) == (AgentID, Type, Rank)
-
     Args:
         agent_tuple: tuple containing the data returned by save function.
         agent_tuple[0][0]: Agent ID
