@@ -10,8 +10,7 @@ This is the code for:
 > Atwal KS, Von Hoene E, Amiri H, Pfoser D, Züfle A, Anderson T. *Mobility and Contact Networks Shape
 > Epidemic Outcomes: A Large-Scale Agent-Based Modeling Study.* arXiv:2607.26217 (2026).
 
-The code for the revised paper (arXiv v2) is tagged `v2.0-paper`. It corrects three issues in the original
-version, tagged `v1.0-paper`, whose results it supersedes: the random-number generators are now seeded independently on each process, so runs are reproducible; contacts are chosen from a random ordering of the agents present, fixed for the run; and the R0 counter now counts only new infections.
+The code for the revised paper (arXiv v2) is tagged `v2.0-paper`. It is archived on Zenodo as [10.5281/zenodo.23407174](https://doi.org/10.5281/zenodo.23407174). It corrects three issues in the original version, tagged `v1.0-paper`, whose results it supersedes: the random-number generators are now seeded independently on each process, so runs are reproducible; contacts are chosen from a random ordering of the agents present, fixed for the run; and the R0 counter now counts only new infections.
 
 ------------------------------------------------------------------------
 
@@ -129,6 +128,7 @@ The software environment is a public image:
 
 - Image: `ghcr.io/heykuldip/mobility-affects-disease:1.1.0`
 - Digest: `sha256:6b2c7a00372cd8800b7c435b7d736150c95886e1ce3bca9165c739a8be8b079d`
+- File the runs used: `abm-1.1.0.sif`, archived as [10.5281/zenodo.23406362](https://doi.org/10.5281/zenodo.23406362)
 
 Build a Singularity image once (Apptainer accepts the same command):
 
