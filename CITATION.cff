@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the paper below."
+title: "mobility-affects-disease"
+type: software
+authors:
+  - {family-names: Atwal, given-names: Kuldip Singh, orcid: https://orcid.org/0000-0002-9483-4668}
+  - {family-names: Von Hoene, given-names: Emma}
+  - {family-names: Amiri, given-names: Hossein}
+  - {family-names: Pfoser, given-names: Dieter}
+  - {family-names: Züfle, given-names: Andreas}
+  - {family-names: Anderson, given-names: Taylor}
+license: GPL-3.0-only
+repository-code: "https://github.com/heykuldip/mobility-affects-disease"
+doi: 10.5281/zenodo.23407173
+preferred-citation:
+  type: article
+  title: "Mobility and Contact Networks Shape Epidemic Outcomes: A Large-Scale Agent-Based Modeling Study"
+  authors:
+    - {family-names: Atwal, given-names: Kuldip Singh, orcid: https://orcid.org/0000-0002-9483-4668}
+    - {family-names: Von Hoene, given-names: Emma}
+    - {family-names: Amiri, given-names: Hossein}
+    - {family-names: Pfoser, given-names: Dieter}
+    - {family-names: Züfle, given-names: Andreas}
+    - {family-names: Anderson, given-names: Taylor}
+  year: 2026
+  doi: 10.48550/arXiv.2607.26217
+  url: "https://arxiv.org/abs/2607.26217"
