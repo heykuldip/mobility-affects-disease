@@ -23,7 +23,7 @@ if [[ ${#MODELS[@]} -eq 0 ]]; then
   else MODELS=(nhts_advan nhts_distance nhts_random random_advan random_places); fi
 fi
 
-INPUTS=${INPUTS:?set INPUTS to the folder holding each model's input folder}
+INPUTS=${INPUTS:?set INPUTS to the folder holding the input folders}
 DECAY_INPUTS=${DECAY_INPUTS:-$INPUTS/nhts_distance/distance_decay_input}
 OUT=${OUT:-/scratch/$USER/abm}
 IMG=${IMG:-$HOME/containers/abm-1.1.0.sif}
