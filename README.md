@@ -283,7 +283,7 @@ pipenv run python -c "import mpi4py, repast4py; print('imports ok')"
 
 ## Citation
 
-If you use this code, please cite:
+If you use this code or methodology in your research, please cite:
 
 ``` bibtex
 @article{atwal2026mobility,
@@ -293,6 +293,8 @@ If you use this code, please cite:
   year    = {2026}
 }
 ```
+
+For reproducibility, also cite the Zenodo DOI of the specific software version used in your analysis.
 
 ## License and acknowledgments
 
