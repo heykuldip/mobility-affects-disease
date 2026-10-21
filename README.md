@@ -2,6 +2,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23407173.svg)](https://doi.org/10.5281/zenodo.23407173)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/heykuldip/mobility-affects-disease)](https://github.com/heykuldip/mobility-affects-disease/releases)
+[![Container](https://img.shields.io/badge/Container-Zenodo-blue)](https://doi.org/10.5281/zenodo.23406362)
 
 An MPI-parallel agent-based simulation, built on [Repast4Py](https://github.com/Repast/repast4py), of how
 mobility assumptions shape contact networks and epidemic outcomes. Five mobility models move a synthetic
